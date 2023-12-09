@@ -2,6 +2,8 @@ const express = require('express')
 const app = express()
 const cors = require('cors') //For accessing api within own url for localhost access
 const jwt = require('jsonwebtoken')
+const {addUser, getPasswordForUsername} = require('./users')
+const sequelize = require('./orm')
 
 
 require("dotenv").config();
@@ -74,6 +76,43 @@ app.post('/login',(req,res)=>{
     // res.send("Got Data");
 })
 
+
+app.post('/signup', async (req,res)=>{
+    console.log(req.body);
+
+    const username = req.body.inputUsername;
+    const password = req.body.inputPassword;
+    const profileImage = req.body.profileImage;
+
+    try{
+        const checkDuplicate = await getPasswordForUsername(username);
+        console.log(!!checkDuplicate);
+        if(!!checkDuplicate) 
+        {
+            res.status(409).json({message: "duplicate"});
+            return;
+        }
+    } catch (err){
+        res.status(500).json({message: "failed"});
+        return;
+    }
+
+
+    try{
+        const newUser = await addUser(username, password, profileImage);
+        if(newUser)
+            res.status(201).json({message:"success"});
+        else
+            res.status(409).json({message: "duplicate"});
+    // } catch(err) {
+        // res.status(500).json({ error: 'Internal Server Error' });
+    } catch (err) {
+        res.status(500).json({message: "failed"});
+    }
+    
+})
+
+
 app.get('/posts', authenticateToken , (req,res)=>{
     // res.json(posts.filter(post=> post.username == req.user.username));
     res.json(posts);
@@ -95,5 +134,15 @@ function authenticateToken(req, res, next) {
     })
     
 }
+
+sequelize.sync()
+  .then(() => {
+    console.log('Database synchronized successfully');
+  })
+  .catch((error) => {
+    console.error('Error synchronizing database:', error);
+  });
+
+
 
 app.listen(4000);
