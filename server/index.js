@@ -4,6 +4,7 @@ const cors = require('cors') //For accessing api within own url for localhost ac
 const jwt = require('jsonwebtoken')
 const {addUser, getPasswordForUsername} = require('./users')
 const sequelize = require('./orm')
+const bcrypt = require('bcrypt');
 
 
 require("dotenv").config();
@@ -47,18 +48,30 @@ app.delete('/logout', (req,res)=>{
     res.sendStatus(204);
 })
 
-app.post('/login',(req,res)=>{
+app.post('/login',async (req,res)=>{
     console.log(req.body);
 
     const username = req.body.inputUsername;
     const password = req.body.inputPassword;
     // const { username, password } = req.body;
 
-    // confirm if password is valid
-    if (password !== "pikachu") {
-        // console.log(password);
+    const localPassword = await getPasswordForUsername(username);
+    // const hashedPassword = await bcrypt.hash(password, 10);
+
+    try{
+    bcrypt.compare(password, localPassword, (error, result) => { 
+        if (error) {
+        return res.status(500).json({message: "failed"});
+        return;
+        }
+
+
+        if(!result) {
         return res.status(401).json({ message: "Invalid password" });
-    }
+        return;
+        }
+        console.log(result);  // result is true when password and hashedPassword match
+    
 
 
     let user = {
@@ -72,7 +85,12 @@ app.post('/login',(req,res)=>{
     const accessToken=jwt.sign(user, jwtSecretKey, { expiresIn: '20m' });
     const refreshToken=jwt.sign(user, jwtRefreshKey);
     refreshTokens.push(refreshToken);
-    res.status(200).json({ message: "success", accessToken , refreshToken});
+    return res.status(200).json({ message: "success", accessToken , refreshToken});
+    });
+    } catch(err){
+        return res.status(500).json({message: "failed"});
+        return;
+    }
     // res.send("Got Data");
 })
 
