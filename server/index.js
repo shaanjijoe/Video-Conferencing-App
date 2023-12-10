@@ -5,8 +5,11 @@ const jwt = require('jsonwebtoken')
 const {addUser, getPasswordForUsername} = require('./users')
 const sequelize = require('./orm')
 const bcrypt = require('bcrypt');
+const ChatUser = require('./models/ChatUser');
+const Message = require('./models/Message');
 
 
+require('./models/Associations')
 require("dotenv").config();
 app.use(cors());
 app.use(express.json());

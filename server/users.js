@@ -1,15 +1,21 @@
 // Function to add (create) a new user
 const User = require('./models/User')
+const ChatUser = require('./models/ChatUser')
 
 const addUser = async (username, password, profileImage) => {
     try {
       const newUser = await User.create({
         username: username,
         password: password,
+      });
+
+      const newChatUser = await ChatUser.create({
+        username: username,
         profileImage: profileImage
       });
   
       console.log('User created:', newUser.toJSON());
+      console.log('ChatUser created:', newChatUser.toJSON());
       return true;
     } catch (error) {
       console.error('Error creating user:', error);

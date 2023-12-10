@@ -12,10 +12,6 @@ const User = sequelize.define('User', {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    profileImage: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    }
   });
 
   // Use hooks to hash the password before saving
