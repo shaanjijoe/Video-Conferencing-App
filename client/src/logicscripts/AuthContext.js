@@ -7,6 +7,7 @@ const AuthProvider = ({children}) => {
     // State to hold token value
     const [authToken, setAuthToken_] = useState(() => localStorage.getItem('token') || '');
     const [isAuthenticated, AuthenticateUser] = useState(false);
+    const [username, setUsername] = useState('');
 
     // Function to update token value
     const login = (newAuthToken) => {
@@ -34,7 +35,7 @@ const AuthProvider = ({children}) => {
     },[authToken]);
 
     // Memoized value of authentication context
-    const contextValue = useMemo(()=>({authToken, login, logout, isAuthenticated}), [authToken, isAuthenticated]);
+    const contextValue = useMemo(()=>({authToken, login, logout, isAuthenticated, username, setUsername}), [authToken, isAuthenticated, username]);
 
     return (<AuthContext.Provider value = {contextValue}>
             {children}

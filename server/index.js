@@ -1,5 +1,16 @@
 const express = require('express')
 const app = express()
+const http = require('http');
+// const socketIo = require('socket.io');
+const server = http.createServer(app);
+// const io = socketIo(server);
+// const setupSocket = require('./socketing');
+// setupSocket(server);// Setup Socket.IO using the module
+const io = require('socket.io')(server, {
+    cors: {
+      origin: '*',
+    }
+  });
 const cors = require('cors') //For accessing api within own url for localhost access
 const jwt = require('jsonwebtoken')
 const {addUser, getPasswordForUsername} = require('./users')
@@ -11,7 +22,11 @@ const Message = require('./models/Message');
 
 require('./models/Associations')
 require("dotenv").config();
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+    origin: '*',
+  }));
+  
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -165,5 +180,25 @@ sequelize.sync()
   });
 
 
+  io.on('connection', (socket) => {
+    console.log('A user connected');
 
-app.listen(4000);
+    // Handle events from the client
+    socket.on('exampleEvent', (data) => {
+      console.log('Received data from client:', data);
+    });
+
+    // Handle disconnection
+    socket.on('disconnect', () => {
+      console.log('User disconnected');
+    });
+  });
+
+
+// app.listen(4000);
+const PORT = process.env.PORT || 4000;
+
+// io.listen(4000);
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

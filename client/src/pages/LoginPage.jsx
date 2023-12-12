@@ -14,7 +14,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login , setUsername} = useAuth();
 
 
   const handleSubmit = async (event) => {
@@ -42,6 +42,7 @@ const LoginPage = () => {
             // localStorage.setItem("jwt-token", data.accessToken);
             login(data.accessToken);
             console.log(data.accessToken);
+            setUsername(inputUsername);
             setInputUsername("");
             setInputPassword("");
             navigate('/homepage');
