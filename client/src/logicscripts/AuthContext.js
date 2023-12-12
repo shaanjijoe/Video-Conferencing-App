@@ -29,7 +29,7 @@ const AuthProvider = ({children}) => {
         if(authToken){
             localStorage.setItem('authToken', authToken);
         } else {
-            localStorage.removeItem('authToken');
+            // localStorage.removeItem('authToken');
         }
 
     },[authToken]);

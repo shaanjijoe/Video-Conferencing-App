@@ -67,3 +67,26 @@ const getMessagesAndProfileImage = async (username) => {
 // const result = await getMessagesAndProfileImage(usernameInput);
 
 // console.log(result);
+const getProfileForUsername = async (username) => {
+  try {
+    const user = await ChatUser.findOne({
+      attributes: ['profileImage'],
+      where: {
+        username: username,
+      },
+    });
+    // console.log(user.profileImage);
+
+    if (user) {
+      return user.profileImage;
+    } else {
+      console.log('User not found');
+      return null; 
+    }
+  } catch (error) {
+    console.error('Error retrieving password:', error);
+    return null; 
+  }
+};
+
+module.exports = {getProfileForUsername};

@@ -9,11 +9,13 @@ const server = http.createServer(app);
 const io = require('socket.io')(server, {
     cors: {
       origin: '*',
+      methods: ["GET", "POST"],
     }
   });
 const cors = require('cors') //For accessing api within own url for localhost access
 const jwt = require('jsonwebtoken')
 const {addUser, getPasswordForUsername} = require('./users')
+const {getProfileForUsername} = require('./chatData')
 const sequelize = require('./orm')
 const bcrypt = require('bcrypt');
 const ChatUser = require('./models/ChatUser');
@@ -32,16 +34,16 @@ app.use(express.urlencoded({ extended: true }));
 
 
 
-const posts = [
-    {
-        username: 'Jane',
-        email: "jane@gmail.com"
-    },
-    {
-        username: "Poda",
-        email: "Poda@gmail.com"
-    }
-]
+// const posts = [
+//     {
+//         username: 'Jane',
+//         email: "jane@gmail.com"
+//     },
+//     {
+//         username: "Poda",
+//         email: "Poda@gmail.com"
+//     }
+// ]
 
 // Storage of refreshTokens
 let refreshTokens = [];
@@ -149,10 +151,10 @@ app.post('/signup', async (req,res)=>{
 })
 
 
-app.get('/posts', authenticateToken , (req,res)=>{
-    // res.json(posts.filter(post=> post.username == req.user.username));
-    res.json(posts);
-})
+// app.get('/posts', authenticateToken , (req,res)=>{
+//     // res.json(posts.filter(post=> post.username == req.user.username));
+//     res.json(posts);
+// })
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
@@ -179,9 +181,41 @@ sequelize.sync()
     console.error('Error synchronizing database:', error);
   });
 
+  const authSocketMiddleware = (socket, next) => {
+    // since you are sending the token with the query
+    const AuthToken = socket.handshake.auth.authToken; 
+    jwt.verify(AuthToken, process.env.ACCESS_TOKEN_KEY, (err, user) => {
+        if (err) return  next(new Error("NOT AUTHORIZED"));
+        // console.log(user);
+        socket.user = user;
+        next();
+    })
+    // next();
+  };
+
+  io.use((socket, next) => {
+    // console.log("Attempt");
+    authSocketMiddleware(socket, next);
+  });
+
 
   io.on('connection', (socket) => {
-    console.log('A user connected');
+    console.log('user connected');
+    // console.log(socket.handshake.auth.authToken);
+    console.log(socket.user.username);
+
+    socket.on('initiate', (data) => {
+        // Handle the 'initiate' event and send necessary data back to the sender
+        const responseData = {
+          profileImage: getProfileForUsername(socket.user.username),
+          // Add other necessary data
+        };
+        // console.log(responseData.profileImage);
+        console.log("Sending Image");
+    
+        // Use 'socket.emit' to send data back to the sender
+        socket.emit('initiate-response', responseData);
+      });
 
     // Handle events from the client
     socket.on('exampleEvent', (data) => {

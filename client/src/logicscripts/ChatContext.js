@@ -7,6 +7,7 @@ const ChatProvider = ({children}) => {
     
     const [isConnected, setIsConnected] = useState(socket.connected);
     const [fooEvents, setFooEvents] = useState([]);
+    const [profilePic, setProfilePic] = useState('');
 
     // Function to update token value
     // const login = (newAuthToken) => {
@@ -28,6 +29,16 @@ const ChatProvider = ({children}) => {
           function onFooEvent(value) {
             setFooEvents(previous => [...previous, value]);
           }
+
+          if(isConnected){
+            socket.emit('initiate');
+          }
+
+            socket.on('initiate-response', (responseData) => {
+              // Process the data returned by the server
+              console.log(responseData.profileImage);
+              setProfilePic(responseData.profileImage);
+            });
       
           socket.on('connect', onConnect);
           socket.on('disconnect', onDisconnect);
@@ -41,7 +52,7 @@ const ChatProvider = ({children}) => {
     },[]);
 
     // Memoized value of authentication context
-    const contextValue = useMemo(()=>({isConnected, fooEvents}), [isConnected, fooEvents]);
+    const contextValue = useMemo(()=>({isConnected, fooEvents, profilePic}), [isConnected, fooEvents, profilePic]);
 
     return (<ChatContext.Provider value = {contextValue}>
             {children}
