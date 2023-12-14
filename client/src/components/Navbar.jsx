@@ -5,12 +5,12 @@ import { useChat } from "../logicscripts/ChatContext";
 const Navbar = () => {
 
     const {username} = useAuth();
-    const {profileImage} = useChat();
+    const {profilePic} = useChat();
     return (
         <div className='navbar'>
             <span className="logo">Conference</span>
             <div className="user">
-                <img src={ profileImage || avatar} alt="" />
+                <img src={ profilePic || avatar } alt={avatar} />
                 <span>{username}</span>
                 {/* <button>login</button> */}
             </div>

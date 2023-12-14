@@ -15,7 +15,7 @@ const io = require('socket.io')(server, {
 const cors = require('cors') //For accessing api within own url for localhost access
 const jwt = require('jsonwebtoken')
 const {addUser, getPasswordForUsername} = require('./users')
-const {getProfileForUsername} = require('./chatData')
+const {getProfileForUsername, getMessagesAndProfileImage} = require('./chatData')
 const sequelize = require('./orm')
 const bcrypt = require('bcrypt');
 const ChatUser = require('./models/ChatUser');
@@ -102,7 +102,7 @@ app.post('/login',async (req,res)=>{
     console.log(user);
     const jwtSecretKey =process.env.ACCESS_TOKEN_KEY;
     const jwtRefreshKey=process.env.REFRESH_TOKEN_KEY;
-    const accessToken=jwt.sign(user, jwtSecretKey, { expiresIn: '20m' });
+    const accessToken=jwt.sign(user, jwtSecretKey, { expiresIn: '20h' });
     const refreshToken=jwt.sign(user, jwtRefreshKey);
     refreshTokens.push(refreshToken);
     return res.status(200).json({ message: "success", accessToken , refreshToken});
@@ -204,17 +204,42 @@ sequelize.sync()
     // console.log(socket.handshake.auth.authToken);
     console.log(socket.user.username);
 
-    socket.on('initiate', (data) => {
+    socket.on('initiate', async (data) => {
         // Handle the 'initiate' event and send necessary data back to the sender
         const responseData = {
-          profileImage: getProfileForUsername(socket.user.username),
+          profileImage: await getProfileForUsername(socket.user.username),
           // Add other necessary data
         };
+
+        // const texts = await getMessagesAndProfileImage(socket.user.username);
+        // console.log(texts);
         // console.log(responseData.profileImage);
         console.log("Sending Image");
+        // console.log(responseData);
     
         // Use 'socket.emit' to send data back to the sender
         socket.emit('initiate-response', responseData);
+      });
+
+      socket.on('getcontent', async (data) => {
+        // Handle the 'initiate' event and send necessary data back to the sender
+        // const responseData = {
+        //   profileImage: await getProfileForUsername(socket.user.username),
+        //   // Add other necessary data
+        // };
+
+        const text = await getMessagesAndProfileImage(socket.user.username);
+        // console.log(texts);
+        const texts = {
+          texts: text,
+        }
+        // console.log(responseData.profileImage);
+        console.log(texts);
+        console.log("Sending texts");
+        // console.log(responseData);
+    
+        // Use 'socket.emit' to send data back to the sender
+        socket.emit('getcontent-response', texts);
       });
 
     // Handle events from the client
@@ -228,7 +253,7 @@ sequelize.sync()
     });
   });
 
-
+// seedDatabase();
 // app.listen(4000);
 const PORT = process.env.PORT || 4000;
 
