@@ -68,7 +68,8 @@ const ChatProvider = ({children}) => {
     },[]);
 
     // Memoized value of authentication context
-    const contextValue = useMemo(()=>({isConnected, fooEvents, profilePic, chats, setSearching, searching, setCurrentChat}), [isConnected, fooEvents, profilePic, chats, searching]);
+    const contextValue = useMemo(()=>({isConnected, fooEvents, profilePic, chats, 
+      setSearching, searching, setCurrentChat, currentChat}), [isConnected, fooEvents, profilePic, chats, searching,currentChat]);
 
     return (<ChatContext.Provider value = {contextValue}>
             {children}

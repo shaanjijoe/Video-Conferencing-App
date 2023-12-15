@@ -9,12 +9,12 @@ import notconnected from "../assets/notconnected.png"
 import { useChat } from "../logicscripts/ChatContext";
 const Chat = () => {
 
-    const {isConnected} = useChat();
+    const {isConnected, currentChat} = useChat();
 
     return (
         <div className='chat'>
             <div className="chatInfo">
-                <span>Jane</span>
+                <span>{currentChat}</span>
                 <div className="chatIcons">
                     <img src={Cam} alt="" />
                     <img src={Add} alt="" />

@@ -3,8 +3,14 @@ import avatar from '../assets/avatar2.png'
 import { useChat } from "../logicscripts/ChatContext";
 
 const Chats = () => {
-  const { chats, currentChat } = useChat();
+  const { chats, setCurrentChat } = useChat();
   const [chatMessages, setChatMessages] = useState([]);
+
+  const handleChatClick = (username) => {
+    // Handle the click event for an individual chat
+    // console.log(username);
+    setCurrentChat(username);
+  };
 
   useEffect(() => {
     // Update chatMessages when chats change
@@ -18,7 +24,7 @@ const Chats = () => {
         const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
 
         return (
-          <div key={username} className="userChat">
+          <div key={username} className="userChat" onClick={() => handleChatClick(username)}>
             <img src={avatar} alt={avatar} style={{ background: "white" }} />
             <div className="userChatInfo">
               <span>{username}</span>
