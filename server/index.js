@@ -15,7 +15,7 @@ const io = require('socket.io')(server, {
 const cors = require('cors') //For accessing api within own url for localhost access
 const jwt = require('jsonwebtoken')
 const {addUser, getPasswordForUsername} = require('./users')
-const {getProfileForUsername, getMessagesAndProfileImage} = require('./chatData')
+const {getProfileForUsername, getMessagesAndProfileImage, insertMessage} = require('./chatData')
 const sequelize = require('./orm')
 const bcrypt = require('bcrypt');
 const ChatUser = require('./models/ChatUser');
@@ -199,10 +199,16 @@ sequelize.sync()
   });
 
 
+  const usernameToSocketId = {};
+  const socketIdToUsername = {};
+
   io.on('connection', (socket) => {
     console.log('user connected');
     // console.log(socket.handshake.auth.authToken);
     console.log(socket.user.username);
+
+    usernameToSocketId[socket.user.username] = socket.id;
+    socketIdToUsername[socket.id] = socket.user.username;
 
     socket.on('initiate', async (data) => {
         // Handle the 'initiate' event and send necessary data back to the sender
@@ -242,14 +248,53 @@ sequelize.sync()
         socket.emit('getcontent-response', texts);
       });
 
+      socket.on('message-input', async (data) => {
+        // Handle the 'initiate' event and send necessary data back to the sender
+        // const responseData = {
+        //   profileImage: await getProfileForUsername(socket.user.username),
+        //   // Add other necessary data
+        // };
+
+        await insertMessage(data);
+
+
+        if(usernameToSocketId[data.sender]!=null){
+          io.to(usernameToSocketId[data.sender]).emit('message-update');
+        }
+
+        if(usernameToSocketId[data.receiver]!=null){
+          io.to(usernameToSocketId[data.receiver]).emit('message-update');
+        }
+        // console.log(data);
+
+        // const text = await getMessagesAndProfileImage(socket.user.username);
+        // // console.log(texts);
+        // const texts = {
+        //   texts: text,
+        // }
+        // // console.log(responseData.profileImage);
+        // console.log(texts);
+        // console.log("Sending texts");
+        // // console.log(responseData);
+    
+        // // Use 'socket.emit' to send data back to the sender
+        // socket.emit('getcontent-response', texts);
+      });
+
     // Handle events from the client
-    socket.on('exampleEvent', (data) => {
-      console.log('Received data from client:', data);
-    });
+    // socket.on('exampleEvent', (data) => {
+    //   console.log('Received data from client:', data);
+    // });
 
     // Handle disconnection
     socket.on('disconnect', () => {
       console.log('User disconnected');
+
+      const disconnectedUsername = socketIdToUsername[socket.id];
+
+      // Assign null instead of deleting the user entries
+      usernameToSocketId[disconnectedUsername] = null;
+      socketIdToUsername[socket.id] = null;
     });
   });
 

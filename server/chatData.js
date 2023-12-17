@@ -145,4 +145,61 @@ const seedDatabase = async () => {
   }
 };
 
-module.exports = {getProfileForUsername, seedDatabase, getMessagesAndProfileImage};
+
+const insertMessage = async (data) => {
+  try {
+    // await sequelize.sync({ force: true }); // Drop and re-create tables
+
+    const sender = await ChatUser.findOne({ where: { username: data.sender } });
+    const receiver = await ChatUser.findOne({ where: { username: data.receiver } });
+    // const shaan4 = await ChatUser.findOne({ where: { username: 'shaan4' } });
+
+    // if (!shaan || !shaan3 || !shaan4) {
+    //   throw new Error('One or more users not found');
+    // }
+
+    // Custom timestamps
+    // const currentTime = new Date();
+
+    // Insert sample data with custom timestamps
+    await Message.create({
+      content: data.content,
+      messageType: data.messageType,
+      timestamp: data.timestamp,
+      senderId: sender.id,
+      receiverId: receiver.id,
+    });
+
+    // await Message.create({
+    //   content: 'noice',
+    //   messageType: 'text',
+    //   timestamp: new Date(currentTime.getTime() + 1000),
+    //   senderId: shaan3.id,
+    //   receiverId: shaan.id,
+    // });
+
+    // await Message.create({
+    //   content: 'bye',
+    //   messageType: 'text',
+    //   timestamp: new Date(currentTime.getTime() + 2000),
+    //   senderId: shaan4.id,
+    //   receiverId: shaan.id,
+    // });
+
+    // await Message.create({
+    //   content: 'poda',
+    //   messageType: 'text',
+    //   timestamp: new Date(currentTime.getTime() + 3000),
+    //   senderId: shaan.id,
+    //   receiverId: shaan4.id,
+    // });
+
+    console.log(data.sender,' data inserted successfully');
+  } catch (error) {
+    console.error('Error seeding database:', error);
+  } finally {
+    // await sequelize.close();
+  }
+};
+
+module.exports = {getProfileForUsername, seedDatabase, getMessagesAndProfileImage, insertMessage};

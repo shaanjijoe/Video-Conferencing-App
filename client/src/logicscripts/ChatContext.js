@@ -19,6 +19,16 @@ const ChatProvider = ({children}) => {
     //     AuthenticateUser(true);
     // };
 
+    const messageInput = (data) => {
+      data.receiver = currentChat;
+      data.sender = username;
+      // console.log(data);
+
+      if(isConnected){
+        socket.emit('message-input', data);
+      }
+    }
+
    
 
     useEffect(()=> {
@@ -40,21 +50,17 @@ const ChatProvider = ({children}) => {
           }
 
             socket.on('initiate-response', (responseData) => {
-              // Process the data returned by the server
-              // console.log(responseData.profileImage);
               setProfilePic(responseData.profileImage);
             });
 
             socket.on('getcontent-response', (texts) => {
-              // Process the data returned by the server
-              // console.log(responseData.profileImage);
-              // console.log(texts.texts);
               // console.log(texts.texts);
               setChats(processMessages(texts.texts,username));
-              // console.log("HI");
-              // console.log(processMessages(texts.texts,username));
-              // setProfilePic(responseData.profileImage);
             });
+
+            socket.on('message-update', () => {
+              socket.emit('getcontent');
+            })
       
           socket.on('connect', onConnect);
           socket.on('disconnect', onDisconnect);
@@ -64,12 +70,15 @@ const ChatProvider = ({children}) => {
             socket.off('connect', onConnect);
             socket.off('disconnect', onDisconnect);
             socket.off('foo', onFooEvent);
+            socket.off('initiate-response');
+            socket.off('getcontent-response');
+            socket.off('message-update');
           };
     },[]);
 
     // Memoized value of authentication context
     const contextValue = useMemo(()=>({isConnected, fooEvents, profilePic, chats, 
-      setSearching, searching, setCurrentChat, currentChat}), [isConnected, fooEvents, profilePic, chats, searching,currentChat]);
+      setSearching, searching, setCurrentChat, currentChat, messageInput}), [isConnected, fooEvents, profilePic, chats, searching,currentChat]);
 
     return (<ChatContext.Provider value = {contextValue}>
             {children}

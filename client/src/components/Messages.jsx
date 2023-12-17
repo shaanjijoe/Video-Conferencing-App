@@ -7,7 +7,7 @@ const Messages = () => {
     useEffect(()=>{
         const temp = chats &&  (chats.find((user) => user.username === currentChat)?.messages || []);
         setSelectedUserMessages(temp);
-        console.log(temp);
+        // console.log(temp);
     },[chats, currentChat])
     // console.log(chats);
     return (

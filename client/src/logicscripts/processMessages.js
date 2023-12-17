@@ -23,7 +23,7 @@ function processMessages(texts, usernameOG) {
     // Convert to array and sort based on the latest message timestamp
     const sortedMessages = Object.entries(userMessages).map(([username, messages]) => ({
       username,
-      messages: messages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)),
+      messages: messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)),
     }));
     // const sortedMessages = userMessages;
   
