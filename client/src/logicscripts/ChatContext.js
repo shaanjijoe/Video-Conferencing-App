@@ -12,6 +12,7 @@ const ChatProvider = ({children}) => {
     const [chats, setChats] = useState();
     const [searching, setSearching] = useState(false);
     const [currentChat, setCurrentChat] = useState();
+    const [allUsers, setAllUsers] = useState([]);
 
     // Function to update token value
     // const login = (newAuthToken) => {
@@ -51,6 +52,8 @@ const ChatProvider = ({children}) => {
 
             socket.on('initiate-response', (responseData) => {
               setProfilePic(responseData.profileImage);
+              setAllUsers(responseData.allUsers);
+              // console.log(responseData.allUsers);
             });
 
             socket.on('getcontent-response', (texts) => {
@@ -78,7 +81,7 @@ const ChatProvider = ({children}) => {
 
     // Memoized value of authentication context
     const contextValue = useMemo(()=>({isConnected, fooEvents, profilePic, chats, 
-      setSearching, searching, setCurrentChat, currentChat, messageInput}), [isConnected, fooEvents, profilePic, chats, searching,currentChat]);
+      setSearching, searching, setCurrentChat, currentChat, messageInput, allUsers}), [isConnected, fooEvents, profilePic, chats, searching,currentChat, allUsers]);
 
     return (<ChatContext.Provider value = {contextValue}>
             {children}

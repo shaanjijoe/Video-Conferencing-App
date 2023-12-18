@@ -88,11 +88,21 @@ const getPasswordForUsername = async (username) => {
     }
   };
 
+const getAllUsers = async () => {
+  try {
+    const allUsers = await ChatUser.findAll();
+    return allUsers;
+  } catch (error) {
+    console.error('Error fetching all users:', error);
+  }
+}
+
 module.exports = {
     addUser,
     editUserPassword,
     deleteUser,
     getPasswordForUsername,
+    getAllUsers
   };
 
 
